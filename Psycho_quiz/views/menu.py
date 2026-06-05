@@ -2,7 +2,6 @@ import os
 
 class QuizAppMenu:
     def __init__(self, user_repo, quiz_service):
-        # Menu ini butuh data user dan logika kuis yang dikirim dari luar
         self.user_repo = user_repo
         self.quiz_service = quiz_service
 
@@ -15,8 +14,8 @@ class QuizAppMenu:
             print("=============================================")
             print("   🧠 PSYCHO-GROUND: LIVE QUIZ APP CLI 🧠   ")
             print("=============================================")
-            print("1. Mulai Kuis Psikologi Baru")
-            print("2. Lihat Riwayat Hasil Kuis (Leaderboard)")
+            print("1. Mulai Kuis Materi Akademik Psikologi")
+            print("2. Lihat Riwayat Hasil Ujian (Leaderboard)")
             print("3. Lihat Daftar Peserta")
             print("4. Keluar")
             print("=============================================")
@@ -41,7 +40,7 @@ class QuizAppMenu:
         
         self.user_repo.register_user(nama, umur)
         
-        print(f"\nHalo {nama}, kuis dimulai!")
+        print(f"\nHalo {nama}, ujian materi psikologi dimulai!")
         input("Tekan Enter untuk memunculkan soal..."); self.clear_screen()
 
         questions = self.quiz_service.get_questions()
@@ -52,24 +51,33 @@ class QuizAppMenu:
             for opsi, teks_opsi in q['opsi'].items():
                 print(f"  {opsi}. {teks_opsi}")
             
-            jawaban = input("Jawaban kamu (A/B): ").upper()
+            # Validasi agar inputan wajib berkisar huruf A sampai D
+            while True:
+                jawaban = input("Jawaban kamu (A/B/C/D): ").upper()
+                if jawaban in ['A', 'B', 'C', 'D']:
+                    break
+                print("Pilihan tidak valid! Tolong ketik A, B, C, atau D.")
+                
             user_answers.append(jawaban)
             self.clear_screen()
 
-        int_score, ext_score, tipe = self.quiz_service.analyze_personality(user_answers)
-        self.quiz_service.save_quiz_result(nama, int_score, ext_score, tipe)
+        # Panggil logika penghitungan skor akademik terbaru
+        skor_total, status_kelulusan = self.quiz_service.calculate_score(user_answers)
+        self.quiz_service.save_quiz_result(nama, skor_total, status_kelulusan)
 
-        print("🎉 KUIS SELESAI! 🎉")
+        print("🎉 UJIAN SELESAI! 🎉")
         print(f"Nama             : {nama}")
-        print(f"Tipe Psikologi   : {tipe}")
+        print(f"Total Nilai      : {skor_total} / 100")
+        print(f"Status           : {status_kelulusan.upper()}")
         input("\nTekan Enter untuk kembali ke menu...")
 
     def menu_lihat_hasil(self):
         self.clear_screen()
-        print("=== 📊 RIWAYAT HASIL KUIS ===")
+        print("=== 📊 RIWAYAT HASIL UJIAN ===")
         results = self.quiz_service.get_leaderboard()
         for idx, r in enumerate(results, 1):
-            print(f"{idx}. {r['nama']} -> {r['tipe_kepribadian']}")
+            # Menampilkan data skor_total dan status kelulusan baru dari DB
+            print(f"{idx}. {r['nama']} -> Nilai: {r['skor_total']} ({r['status']})")
         input("\nTekan Enter...")
 
     def menu_daftar_user(self):
