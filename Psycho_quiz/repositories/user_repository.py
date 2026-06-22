@@ -11,3 +11,8 @@ class UserRepository:
     def find_all_users(self):
         return self.collection # Langsung mengembalikan semua list user
     
+    def export_data(self, nama_file):
+        self.quiz_repo.export_results_to_json(nama_file)
+
+    def import_data(self, nama_file):
+        self.quiz_repo.import_results_from_json(nama_file)
