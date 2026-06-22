@@ -108,26 +108,50 @@ class QuizRepository:
             cursor.execute("DELETE FROM results")
             conn.commit()
 
-    # ==================== FITUR BARU TUGAS 12: EXPORT & IMPORT JSON ====================
-    
-    # 1. Fitur Kunci Export Data ke JSON
     def export_results_to_json(self, file_path):
         data_nilai = self.get_all_results()
         with open(file_path, 'w') as json_file:
-            # Mengonversi list data dari database menjadi teks file JSON yang rapi
             json.dump(data_nilai, json_file, indent=4)
 
-    # 2. Fitur Kunci Import Data dari JSON
     def import_results_from_json(self, file_path):
         with open(file_path, 'r') as json_file:
             data_imported = json.load(json_file)
-            
         with self._get_connection() as conn:
             cursor = conn.cursor()
             for r in data_imported:
-                # Memasukkan record hasil parsing JSON satu per satu ke tabel SQLite
                 cursor.execute('''
                     INSERT INTO results (nama_peserta, skor_total, status, waktu_ujian)
                     VALUES (?, ?, ?, ?)
                 ''', (r['nama_peserta'], r['skor_total'], r['status'], r['waktu_ujian']))
             conn.commit()
+
+    # ==================== FITUR BARU TUGAS 13: PENGOLAHAN DATA STATISTIK ====================
+    def calculate_quiz_statistics(self):
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 1. Hitung total peserta yang sudah ujian
+            cursor.execute("SELECT COUNT(*) FROM results")
+            total_peserta = cursor.fetchone()[0]
+            
+            if total_peserta == 0:
+                return None
+                
+            # 2. Hitung rata-rata skor nilai ujian (Komputasi Matematika)
+            cursor.execute("SELECT AVG(skor_total) FROM results")
+            rata_rata_skor = round(cursor.fetchone()[0], 2)
+            
+            # 3. Hitung jumlah peserta yang berstatus Lulus
+            cursor.execute("SELECT COUNT(*) FROM results WHERE status = 'Lulus'")
+            total_lulus = cursor.fetchone()[0]
+            
+            # 4. Hitung persentase kelulusan kelas
+            persentase_lulus = round((total_lulus / total_peserta) * 100, 2)
+            
+            return {
+                "total_peserta": total_peserta,
+                "rata_rata_skor": rata_rata_skor,
+                "total_lulus": total_lulus,
+                "total_tidak_lulus": total_peserta - total_lulus,
+                "persentase_lulus": persentase_lulus
+            }

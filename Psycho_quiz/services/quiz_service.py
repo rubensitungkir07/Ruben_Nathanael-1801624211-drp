@@ -6,30 +6,43 @@ class QuizService:
         return self.quiz_repo.get_all_questions()
 
     def calculate_score(self, answers):
-        # Mengambil semua soal asli dari repository untuk mencocokkan kunci jawaban
         questions = self.get_questions()
         total_soal = len(questions)
         jawaban_benar_count = 0
 
-        # Cocokkan jawaban user berdasarkan ID Soal
         for idx, q in enumerate(questions):
             if idx < len(answers) and answers[idx] == q['jawaban_benar']:
                 jawaban_benar_count += 1
         
-        # Hitung skor matematika skala 100
-        if total_soal > 0:
-            skor_total = int((jawaban_benar_count / total_soal) * 100)
-        else:
-            skor_total = 0
-
-        # Tentukan status kelulusan (Batasan kelulusan KKM: 70)
+        skor_total = int((jawaban_benar_count / total_soal) * 100) if total_soal > 0 else 0
         status_kelulusan = "Lulus" if skor_total >= 70 else "Tidak Lulus"
         
         return skor_total, status_kelulusan
 
     def save_quiz_result(self, nama, skor_total, status_kelulusan):
-        # Menyambungkan ke parameter repositori baru akademik
         self.quiz_repo.save_result(nama, skor_total, status_kelulusan)
 
     def get_leaderboard(self):
         return self.quiz_repo.get_all_results()
+
+    def get_users(self):
+        return self.quiz_repo.get_all_users()
+
+    def register_new_user(self, nama, umur):
+        self.quiz_repo.register_user(nama, umur)
+
+    def update_soal(self, id_quiz, jawaban_baru):
+        self.quiz_repo.update_quiz_answer(id_quiz, jawaban_baru)
+
+    def reset_leaderboard(self):
+        self.quiz_repo.delete_all_results()
+
+    def export_data(self, nama_file):
+        self.quiz_repo.export_results_to_json(nama_file)
+
+    def import_data(self, nama_file):
+        self.quiz_repo.import_results_from_json(nama_file)
+
+    # Menghubungkan fungsi statistik repositori ke bagian menu/view
+    def get_insights(self):
+        return self.quiz_repo.calculate_quiz_statistics()

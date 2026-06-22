@@ -11,19 +11,20 @@ class QuizAppMenu:
         while True:
             self.clear_screen()
             print("=============================================")
-            print("   🧠 PSYCHO-GROUND: SQLITE & JSON APP 🧠    ")
+            print("  🧠 PSYCHO-GROUND: ADVANCED QUIZ SYSTEM 🧠  ")
             print("=============================================")
             print("1. Mulai Kuis Ujian (Create & Read)")
             print("2. Lihat Riwayat Nilai / Leaderboard (Read)")
             print("3. Lihat Daftar Peserta Terdaftar (Read)")
             print("4. [Admin] Update Jawaban Soal (Update)")
             print("5. [Admin] Reset Semua Hasil Nilai (Delete)")
-            print("6. [Tugas 12] Export Riwayat Nilai ke JSON (Export)")
-            print("7. [Tugas 12] Import Riwayat Nilai dari JSON (Import)")
-            print("8. Keluar")
+            print("6. [Tugas 12] Export Riwayat Nilai ke JSON")
+            print("7. [Tugas 12] Import Riwayat Nilai dari JSON")
+            print("8. [Tugas 13] Tampilkan Analisis Data (Insights)")
+            print("9. Keluar")
             print("=============================================")
             
-            pilihan = input("Pilih menu (1-8): ")
+            pilihan = input("Pilih menu (1-9): ")
 
             if pilihan == '1':
                 self.menu_mulai_kuis()
@@ -40,6 +41,8 @@ class QuizAppMenu:
             elif pilihan == '7':
                 self.menu_import_json()
             elif pilihan == '8':
+                self.menu_insights_data()
+            elif pilihan == '9':
                 print("\nSampai jumpa!")
                 break
 
@@ -113,7 +116,6 @@ class QuizAppMenu:
             print("\nSeluruh data riwayat nilai berhasil dihapus!")
         input("\nTekan Enter...")
 
-    # FITUR OUTPUT JSON TUGAS 12
     def menu_export_json(self):
         self.clear_screen()
         print("=== 📤 EXPORT DATA KE FILE JSON ===")
@@ -125,7 +127,6 @@ class QuizAppMenu:
             print(f"\nGagal melakukan export: {e}")
         input("\nTekan Enter...")
 
-    # FITUR INPUT JSON TUGAS 12
     def menu_import_json(self):
         self.clear_screen()
         print("=== 📥 IMPORT DATA DARI FILE JSON ===")
@@ -136,3 +137,27 @@ class QuizAppMenu:
         except Exception as e:
             print(f"\nGagal melakukan import: {e}")
         input("\nTekan Enter...")
+
+    # OUTPUT UTAMA UNTUK TUGAS 13
+    def menu_insights_data(self):
+        self.clear_screen()
+        print("=== 📈 LAPORAN PENGOLAHAN DATA STATISTIK (INSIGHTS) ===")
+        stats = self.quiz_service.get_insights()
+        
+        if stats is None:
+            print("[Peringatan] Belum ada data nilai terkumpul untuk diolah.")
+            print("Silakan jalankan Menu 1 atau lakukan Import data JSON terlebih dahulu!")
+        else:
+            print(f"1. Total Responden/Peserta Ujian  : {stats['total_peserta']} Orang")
+            print(f"2. Rata-Rata Nilai Kuis Psikologi  : {stats['rata_rata_skor']} / 100")
+            print(f"3. Jumlah Peserta Lulus (>= 70)    : {stats['total_lulus']} Orang")
+            print(f"4. Jumlah Peserta Tidak Lulus      : {stats['total_tidak_lulus']} Orang")
+            print(f"5. Persentase Kelulusan Akademik   : {stats['persentase_lulus']}%")
+            print("-------------------------------------------------------")
+            print(" Kesimpulan Kelompok:")
+            if stats['rata_rata_skor'] >= 70:
+                print(" -> Mayoritas mahasiswa sudah memahami materi Akademik Psikologi dengan baik.")
+            else:
+                print(" -> Tingkat pemahaman materi masih rendah, disarankan melakukan evaluasi modul.")
+                
+        input("\nTekan Enter untuk kembali...")
